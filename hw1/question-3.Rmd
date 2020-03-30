@@ -1,0 +1,54 @@
+---
+title: 'Homework 1 Question 3'
+author: 'Yuval Saraf'
+date: '3/29/2020'
+output: html_document
+---
+#### Preparation
+```{r}
+    # Libraries
+    library(ggplot2);
+    library("dplyr");
+    world_map <- map_data("world");
+```
+
+#### Requirements 
+Following the outbreak of coronavirus, datasets outlining the cases have been released. As this course is all about data analysis,  you will perform an EDA (Exploratory Data Analysis) on the COVID-19 dataset from Johns Hopkins.
+
+Download the datasets  confirmed, deaths, and recovered.
+```{r}
+confirmed = read.csv('time_series_covid19_confirmed_global.csv');
+deaths = read.csv('time_series_covid19_deaths_global.csv');
+recovered = read.csv('time_series_covid19_recovered_global.csv');
+```
+
+Create three world map graphs of the confirmed, deaths, and recovered coronavirus cases from the data. On each layover the number of cases for the most recent date. You can use these resources for world map visualizations Background map, Bubble map.
+```{r}
+drawMap <- function (name, data) {
+    latestDay = tail(names(data), n = 1);
+    data$sum <- rowSums(data[,grepl("^X", colnames(data))]);
+    dataFormatted <- data %>%
+        rename(region = 'Country.Region', subregion = 'Province.State', lat = 'Lat', long = 'Long', latestDay = latestDay) %>%
+        select(region, subregion, lat, long, sum, latestDay);
+
+    ggplot(world_map, aes(x = long, y = lat, group = group)) +
+        geom_polygon(fill="lightgray", colour = "white") +
+        geom_point(data = dataFormatted, aes(x = long, y = lat, size = sum, color = latestDay), inherit.aes = FALSE) + 
+        scale_size(
+            name = name
+        ) + 
+        labs(color = paste(name, 'in latest day'));
+}
+```
+1. World map graph of confirmed:
+    ```{r}
+    drawMap('Confirmed', confirmed);
+    ```
+2. World map graph of deaths:
+    ```{r}
+        drawMap('Deaths', deaths);
+    ```
+3. World map graph of recovered:
+    ```{r}
+        drawMap('Recovered', recovered);
+    ```
