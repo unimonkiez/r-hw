@@ -1,18 +1,73 @@
 ---
-title: "Homework 1 Question 2"
-author: "Yuval Saraf"
-date: "3/29/2020"
+title: 'Homework 1 Question 2'
+author: 'Yuval Saraf'
+date: '3/29/2020'
 output: html_document
 ---
 #### Preparation
 
 ```{r}
-nflSalaries = read.csv("NFL-salaries.csv");
+nflSalaries = read.csv('NFL-salaries.csv');
+nflSalaries$SalaryNum = as.numeric(stringr::str_remove(nflSalaries$Salary, '\\$'));
 summary(nflSalaries);
 ```
-
-a. How many players are on this list? 
+1. Find the subset of players that earned at least $1,000,000. Assign those rows to the variable BigBucks.
     ```{r}
-    nrow(nflSalaries)
+        minForBigBucks = 10^6;
+        BigBucks = nflSalaries[nflSalaries$SalaryNum >= minForBigBucks, ];
+        summary(BigBucks)
+    ```
+    a. How many players are on this list? 
+        ```{r}
+        nrow(BigBucks);
+        ```
+    b.  
+        Draw a histogram of the salaries of the Players in the BigBucks category.
+        * In order to improve the readability of the histogram, scale the data so that the salaries are in millions of dollars. For example, Cousins earned $27,500,000. You would depict this as 27.5.
+        * Of course, you need to provide an appropriate label for the x-axis so that it is clear that this is $ 27.5M and not twenty-seven dollars and 50 cents
+        * Set the number of bins in the histogram to 5 using the “breaks” parameter. (use ‘?hist’ for details)
+        * Save the plot to a PDF
+        * Open the PDF file to make sure that you succeeded.
+        <br>
+        <br>
+        ```{r, message=FALSE}
+        desiredBins = 5;
+        nflSalariesInMillions = BigBucks$SalaryNum / 10^6;
+        minSalaryInMillions = min(nflSalariesInMillions);
+        maxSalaryInMillions = max(nflSalariesInMillions);
+
+        xaxis = seq(from = minSalaryInMillions, to = maxSalaryInMillions, length.out = desiredBins + 1);
+
+        drawHist <- function() {
+            hist(
+                nflSalariesInMillions,
+                xaxt = 'n',
+                main = 'Histogram of NFL Salaries',
+                xlab = expression('NFL salaries'['[M$]']),
+                ylab = 'Count',
+                breaks = xaxis
+            );
+            axis(1, at = xaxis);
+        }
+
+        pdf('histogram-NFL-salaries.pdf');
+        drawHist();
+        suppressMessages <- dev.off();
+
+        drawHist();
+        ```
+2. Analyze the entire dataset to find out how many players make the lowest salary. Start by finding the minimum salary and find those players that make that minimum salary.
+
+    ```{r}
+    minSalary = min(nflSalaries$SalaryNum);
+    minBucks = nflSalaries[nflSalaries$SalaryNum == minSalary, ];
+    nrow(minBucks);
+    minBucks
     ```
 
+3. How many players earn more than 10 million? 
+
+    ```{r}
+    superBigBucks = nflSalaries[nflSalaries$SalaryNum >= 10 * 10^6, ];
+    nrow(superBigBucks);
+    ```
