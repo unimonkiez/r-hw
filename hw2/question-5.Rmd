@@ -1,0 +1,48 @@
+---
+title: 'Homework 2 Question 5'
+author: 'Yuval Saraf'
+date: '05/29/2020'
+output: html_document
+---
+Regular expression is a sequence of characters that is used to define a search pattern within text. Regular expressions date back to the early days of high-level programming languages in the 1950s, and are in use in most modern programming languages and also in some text editors, for example Google Docs. 
+
+Few examples of regular expressions in R and how they are used can be found here:
+
+https://rstudio.com/wp-content/uploads/2016/09/RegExCheatsheet.pdf
+
+A more comprehensive list of regular expressions can be found here:
+
+https://github.com/google/re2/blob/master/doc/syntax.txt
+
+
+
+Here is a simple example of the usability of regular expressions. Say that we have the following characters vector:
+
+```{r}
+vec<-c("$435", "24 dollars", "10 or so", "about 15")
+```
+
+Suppose that we want to ‘clean’ the vector, so that only the numbers will remain. We can do so easily with two R functions that allow us to use regular expressions to detect and extract patterns: regexpr and regmatches, respectively.    
+
+```{r}
+regmatches(vec, regexpr("[0-9]+", vec))
+```
+
+Read the file RefSeqDescriptionMouse.txt into R. 
+
+Brief explanation about this file:
+
+This file contains data from RefSeq, which is a set of well-annotated genes, for details see: https://www.ncbi.nlm.nih.gov/refseq/.  
+Specifically, this file lists all the mouse transcripts. Each row starts with a RefSeq transcript annotation, which begins with ‘NM_’ for coding genes or ‘NR_’ for non-coding genes. Next follows the gene description, which contains the gene symbol inside brackets. 
+
+For example, in these three rows from the file, the gene symbol is underlined: 
+
+NM_001357882    cysteine and histidine rich 1 (Cyhr1), transcript variant 8, mRNA.
+
+NM_001357816    gamma-aminobutyric acid (GABA) A receptor, subunit alpha 3 (Gabra3), transcript variant 4, mRNA.
+
+NM_007409    alcohol dehydrogenase 1 (class I) (Adh1), mRNA.
+
+Note that several transcripts can have the same gene symbol, due to alternative splicing. Therefore, if there are several transcripts with the same gene symbol they are listed in the gene description as ‘transcript variant 1’, ‘transcript variant 2’ and so on.
+
+Use regular expressions to create a data frame in R which, for each RefSeq transcript annotation, holds the gene symbol and transcript variant number (marked as 1 if there is only one transcript variant). Use the data frame to detect the gene with the highest number of transcript variants.   

@@ -1,0 +1,17 @@
+---
+title: 'Homework 2 Question 4'
+author: 'Yuval Saraf'
+date: '05/29/2020'
+output: html_document
+---
+1. Load the data set ’CLL’ and look at the first rows and columns to understand its structure. 
+
+2. For each of the 12625 genes, test whether its mean expression is equal for patients with stable and progressive disease and store the corresponding p-value. 
+
+3. Compute “by hand” the adjusted p-values using Bonferroni’s correction method. 
+
+4. How many hypotheses are rejected without correction and with Bonferroni correction? 
+
+5. Compute the adjusted p-values using Bonferroni’s correction, Holm’s correction and BenjaminiHochberg’s correction as implemented in the function p.adjust. Compare these p-values among themselves and with the Bonferroni p-values calculated above. 
+
+6. How many hypotheses are rejected with each of the correction methods?

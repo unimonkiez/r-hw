@@ -1,0 +1,1 @@
+onchange -i './hw*/**/*.Rmd' -- ./build.sh
