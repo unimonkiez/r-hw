@@ -12,16 +12,45 @@ Here is the output from t.test(): 
 ![](2020-05-29-22-27-06.png)
 
 1. Define parameters and state null and alternative hypotheses for the test.    
-  As it states in the picture, 
+    As it shown in the picture, the test is Welch two sample t-test, between two samples with different standard deviation.  
+    * `younger` is dataframe with same structure as `d`, but just the rows with `AgeGroup=='Younger than 55'`.  
+    * `older` is dataframe with same structure as `d`, but just the rows with `AgeGroup=='55 and Older'`.  
+    * `t.test` is function which runs t test for the data given to it, and the output parameters are:
+      * t value is 3.671
+      * df (degrees of freedom) is 211.7
+      * p value is 0.000153
+    
+    The null hypotheses is that the two samples comes from 2 groups with same mean, 
 
         
 2. Compute the point estimate and standard error for the difference in sample means. Use formulas and attach your calculation.    
+    ```{r}
+    n_young = 187;
+    n_old = 86;
+    sd_young = 653.2;
+    sd_old = 499.1;
+    mean_young = 1824.6;
+    mean_old = 1560.5;
+
+    (point_estimate = mean_young - mean_old);
+    (standard_error = ((sd_young^2/n_young)+(sd_old^2/n_old))^0.5);
+    ```
+3. The computer output provides a test statistic. Use the T test formula to show how it was calculated.  
+    ```{r}
+    (t = point_estimate / standard_error);
+    ```  
 
         
-3. The computer output provides a test statistic. Use the T test formula to show how it was calculated.    
-
+4. How many degrees of freedom would we have used had we used the simpler method?  
+    ```{r}
+    (simple_df = n_young + n_old - 2);
+    ```  
         
-4. How many degrees of freedom would we have used had we used the simpler method?    
+5. List at least two assumptions that underlie the statistical method used for this test. Are you concerned about the validity of the test? Briefly explain.  
+    There are 2 assumptions being made here to perform Welch test:  
+    1. The population distributions being normally distributed.
+    2. The variances of the groups are unqual.  
 
-        
-5. List at least two assumptions that underlie the statistical method used for this test. Are you concerned about the validity of the test? Briefly explain. 
+    We do know the variances of the samples are unequal, but that doesn't mean that the group they were taken out of is also unequal.  
+    
+    Not concerned about the validity of the test because Welch also supports groups of same variances, and as for distribution, there is nothing that leads to believe it isn't normally distributed, without any external influence (such as taken from different country and more).

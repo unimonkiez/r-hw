@@ -1,1 +1,1 @@
-R -e "library(rmarkdown); render(\"./hw2/question-1.Rmd\")"
+R -e "library(rmarkdown); render(\"./hw2/question-2.Rmd\")"
