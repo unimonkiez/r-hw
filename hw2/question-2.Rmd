@@ -17,10 +17,26 @@ A total of twenty-two rats were randomly assigned to the diets, eleven to each d
     sd_b = 16.5;
     n_a = 11;
     n_b = 11;
-    ```
-2. Calculate and interpret an appropriate confidence interval. Explain the relationship between a confidence interval and the result of an hypothesis test
 
-3. A colleague asserts that had the raw data been available (instead of the summaries given above), a paired t-test would be the appropriate test for analyzing the study results. Are they correct? Discuss. (You can check the tests by using R code).
+    (df = ( (sd_a^2/n_a + sd_b^2/n_b)^2 )/( (sd_a^2/n_a)^2/(n_a-1) + (sd_b^2/n_b)^2/(n_b-1) ));
+    (critical_t = qt(0.95, df = df));
+    (t = ((mean_a - mean_b) / ((sd_a^2/n_a)+(sd_b^2/n_b))^0.5));
+    (p = 2*pt(-abs(t), df));
+    ```
+    The null hypothesis is that that group A and B has same means.  
+
+2. Calculate and interpret an appropriate confidence interval. Explain the relationship between a confidence interval and the result of an hypothesis test
+    We got p-value of
+    ```{r}
+    p
+    ```
+    Which means out confidence interval is ~99.7%.
+
+3. A colleague asserts that had the raw data been available (instead of the summaries given above), a paired t-test would be the appropriate test for analyzing the study results. Are they correct? Discuss. (You can check the tests by using R code).  
+    The paired t-test is inappropriate for the data becuase paired test usually tests the procedure itself on the same group.  
+    Even though the sizes of the groups are the same, they are not the same group, therefore doing the paired t-test might give wrong results.  
 
 4. Explain the difference between a Type I and II error. How does the choice of a significance level ־± relate to these terms?
+    Type I error is when we falsly reject the null hypothesis (false positive).  
+    Type II error is when we falsly accept the null hypothesis (false negative).  
 
