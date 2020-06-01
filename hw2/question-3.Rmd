@@ -25,6 +25,20 @@ The researcher approached you to help figure out if the difference between the g
 
 
 1. Can you perform a T-test? If you can, perform a T-test and explain the results. If the answer is no, explain why not. Remember the T-test assumption (random sampling, normality of data distribution, ….) (R code)
+    ```{r}
+    t.test(Groap_A, Groap_B);
+    ```
+    The test can be coducted becuase  
+    * Unknown deviation. 
+    * Compared with another group.  
+    * Non paired.  
+    * Unknown if same variance.  
+
+    But there were few assumptions made: 
+    * Both group are sampled from bigger groups which are normaly distributed.  
+    * Random, unbiased sampling.  
+
+    Looks like it might 
 
 2. Can you use a non parametric test to compare the mean of the two groups? If yes, explain the test and show the calculation (R code)
 
