@@ -7,13 +7,13 @@ output: html_document
 Following an extensive study a researcher wants to test the difference between two groups
 
 ```{r}
-Groap_A = c(1.25310535, 0.55464140, 0.30128300, 1.29312466, 0.99455579,
+Group_A = c(1.25310535, 0.55464140, 0.30128300, 1.29312466, 0.99455579,
             0.51417430, 2.00783240, 0.42224244, 2.17877257, 3.21778902,
             0.55782935, 0.59461765, 0.97739581, 0.20986658, 0.30944786,
             1.10593627, 0.77418776, 0.08967408,1.10817666, 0.24726425,
             1.57198685, 4.83281274, 0.43113213, 2.73038931, 1.13683142,
             0.81336825, 0.83700649, 1.78476540, 2.31247163, 2.90988727)
-Groap_B = c(2.94928948, 0.70302878, 0.69016263, 1.25069011, 0.43649776,
+Group_B = c(2.94928948, 0.70302878, 0.69016263, 1.25069011, 0.43649776,
            0.22462232, 0.39231981, 1.57634350, 0.42792839, 0.19608026,
            0.37724368, 0.07071508, 0.03962611, 0.38580831, 2.63928857,
            0.78220807, 0.66454197, 0.95685690,0.02484568, 0.21600677,
@@ -24,27 +24,76 @@ Groap_B = c(2.94928948, 0.70302878, 0.69016263, 1.25069011, 0.43649776,
 The researcher approached you to help figure out if the difference between the groups is statistically valid.
 
 
-1. Can you perform a T-test? If you can, perform a T-test and explain the results. If the answer is no, explain why not. Remember the T-test assumption (random sampling, normality of data distribution, ….) (R code)
+1. Can you perform a T-test? If you can, perform a T-test and explain the results. If the answer is no, explain why not. Remember the T-test assumption (random sampling, normality of data distribution, ….) (R code)  
+
+    At first sight it might seem like we can't perform a t-test becuase the origin of the data might be normally distributed, and even looking at the histogram of the data it might look like an exponential distribution
     ```{r}
-    t.test(Groap_A, Groap_B);
+    par(mfrow = c(1, 2));
+    hist(Group_A);
+    hist(Group_B);
     ```
-    The test can be coducted becuase  
-    * Unknown deviation. 
-    * Compared with another group.  
-    * Non paired.  
-    * Unknown if same variance.  
 
-    But there were few assumptions made: 
-    * Both group are sampled from bigger groups which are normaly distributed.  
-    * Random, unbiased sampling.  
+    But because each sample size is atleast 30, CLT's (Central Limit Theorem) assumptions exists and the test can be conducted.  
+    ```{r}
+    t.test(Group_A, Group_B);
+    ```
 
-    Looks like it might 
 
 2. Can you use a non parametric test to compare the mean of the two groups? If yes, explain the test and show the calculation (R code)
 
+    Thanks to R, we have a simple way to conduct a Mann-Whitney U test without diving to calculations
+    ```{r}
+    wilcox.test(Group_A, Group_B);
+    ```
+    Mann-Whitney U Test princple
+    * Used to test whether two samples are likely to derive from the same population
+    * Some investigators interpret this test as comparing the medians between the two populations
+    * This test is often performed as a two-sided test
+
 3. To compare the mean of the two groups, we can take the permutation test approach. 
     1. Perform randomly 20 permutations and observe the difference in mean [i.e, Randomly shuffle the labels of the two original groups, such that two new 'permutated' groups will be obtained, each with 30 numbers. Then calculate the mean of each group and the difference between the means under all 20 permutations]. (R code)
+
+        ```{r}
+        getMeanDiffBetweenPermGroups = function () {
+            randomize = sample(c(Group_A, Group_B));
+            Group_A_perm = randomize[1:30];
+            Group_B_perm = randomize[31:60];
+            Group_A_perm_mean = mean(Group_A_perm);
+            Group_B_perm_mean = mean(Group_B_perm);
+            return (Group_A_perm_mean - Group_B_perm_mean);
+        }
+        numOfPerm = 20;
+        diffs = replicate(numOfPerm, getMeanDiffBetweenPermGroups());
+        hist(diffs);
+        ```
     2. Create a function that will generate the realizations as described in 3.1 and will output the difference between the means of the two 'permutated' groups. (R code)
+        ```{r}
+        getMeanDiffBetweenPermGroups()
+        ```
     3. Run 1 million permutations and calculate the p-value directly from the permutations - that is, (1+H)/N whereas H is the number of times the permutations have higher score (the score is the difference between the means of the two groups) compared to the score of the real (un-permuted) data.  (R code)
-    4. Run only 1e3 permutations and then plot the histogram of the scores obtained - it should be close to normal distribution - then calculate the z-score of the real data using that normal distribution. Finally, calculate the p-value from the z-score. (R code)
-    5. Compare the results 3.3 to 3.4 and explain.
+        ```{r}
+        unpremDiff = mean(Group_A) - mean(Group_B);
+        numOfPerm = 10^4;
+        diffs = replicate(numOfPerm, getMeanDiffBetweenPermGroups());
+        (H = sum(ifelse(diffs > unpremDiff, 1, 0)));
+        (pValue = (H + 1) / numOfPerm);
+        ```
+        
+    4. Run only 1e3 permutations and then plot the histogram of the scores obtained - it should be close to normal distribution - then calculate the z-score of the real data using that normal distribution. Finally, calculate the p-value from the z-score. (R code)  
+
+        ```{r}
+        numOfPerm = 10^3;
+        diffs = replicate(numOfPerm, getMeanDiffBetweenPermGroups());
+        hist(diffs);
+        unpremDiff = mean(Group_A) - mean(Group_B);
+        z = (unpremDiff)/(sd(diffs)/sqrt(length(diffs)));
+        H = sum(ifelse(z < diffs, 1, 0));
+        pValue = 2*pnorm(-abs(z));
+        pValue 
+        ```
+    5. Compare the results 3.3 to 3.4 and explain.  
+    
+        Scores are very similar (pValue of ~0.001-0.01), the only difference between approaches is that in 3.3 we do permutation-test, which is non-parametric, meaning we do not assume we know the paramters such as the distribution, mean or sd of the population.  
+        As for 3.4, we conduct a z-test but normalize the score to use the permutations as the population, more accurate if there is a large sample size as we do (30+).    
+
+        

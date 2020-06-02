@@ -18,7 +18,7 @@ A total of twenty-two rats were randomly assigned to the diets, eleven to each d
     n_a = 11;
     n_b = 11;
 
-    (df = ( (sd_a^2/n_a + sd_b^2/n_b)^2 )/( (sd_a^2/n_a)^2/(n_a-1) + (sd_b^2/n_b)^2/(n_b-1) ));
+    (df = n_a + n_b - 2 );
     (critical_t = qt(0.95, df = df));
     (t = ((mean_a - mean_b) / ((sd_a^2/n_a)+(sd_b^2/n_b))^0.5));
     (p = 2*pt(-abs(t), df));
