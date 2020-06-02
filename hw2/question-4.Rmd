@@ -5,15 +5,11 @@ date: '05/29/2020'
 output: html_document
 ---
 1. Load the data set ’CLL’ and look at the first rows and columns to understand its structure.  
-
-        ```{r, message=FALSE}
-        library(CLL);
-        ```
-
-        ```{r}
-        data("CLLbatch");
-        summary(CLLbatch);
-        ```
+    ```{r}
+    load("CLL.RData");
+    colnames(CLL)[1:10]; # To understand the columns
+    ```
+    Not enough time to complete this question... hopefully you will enjoy the next question. 😳
 
 2. For each of the 12625 genes, test whether its mean expression is equal for patients with stable and progressive disease and store the corresponding p-value. 
 

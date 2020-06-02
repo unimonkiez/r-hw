@@ -46,3 +46,21 @@ NM_007409    alcohol dehydrogenase 1 (class I) (Adh1), mRNA.
 Note that several transcripts can have the same gene symbol, due to alternative splicing. Therefore, if there are several transcripts with the same gene symbol they are listed in the gene description as ‘transcript variant 1’, ‘transcript variant 2’ and so on.
 
 Use regular expressions to create a data frame in R which, for each RefSeq transcript annotation, holds the gene symbol and transcript variant number (marked as 1 if there is only one transcript variant). Use the data frame to detect the gene with the highest number of transcript variants.   
+
+```{r}
+fileName = 'RefSeqDescriptionMouse.txt';
+txt = readChar(fileName, file.info(fileName)$size);
+rows = unlist(strsplit(txt, "\n"));
+rowNum = length(rows);
+rowsSplitted = Map(function(row) {
+    regResult = unlist(regmatches(row, regexec("^((NM_|NR_).{1,})\t(.*){1,}\\((.{1,})\\)(, transcript variant (\\d)|), (.{1,})\\.$", row)));
+    transcriptAnnotation = regResult[2];
+    geneSymbol = regResult[5];
+    transcriptVariant = as.numeric(regResult[7]);
+    transcriptVariant = ifelse(is.na(transcriptVariant), 1, transcriptVariant);
+    return (c(transcriptAnnotation, geneSymbol, transcriptVariant));
+}, rows);
+df = data.frame(Reduce(rbind, rowsSplitted))
+colnames(df) = c("transcriptAnnotation", "geneSymbol", "transcriptVariant")
+df[which.max(df$transcriptVariant),]
+```
