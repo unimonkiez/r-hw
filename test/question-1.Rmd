@@ -42,7 +42,11 @@ https://drive.google.com/file/d/1eS7Tf7lM-c1d54FZq2YXV8jBKLSRmut4/view?usp=shari
     הקפידו על כותרות לצירים בגרף.
 
     ```{r}
-    2+2
+    kobe = read.csv("kobe.csv", header = TRUE);
+    seasons = unique(kobe$season);
+    seasonsOrdered = seasons[order(seasons)];
+    threeShortPerSeason = Map(function(season) { return (nrow(kobe[kobe$season == season & kobe$shot_type == "3PT Field Goal", ])); }, seasonsOrdered);
+    plot(unlist(threeShortPerSeason), main="3 shots by kobe", xlab="Season index", ylab="3 shots made");
     ```
 
 2. סעיף ב׳ (15 נקודות):  
@@ -52,6 +56,14 @@ https://drive.google.com/file/d/1eS7Tf7lM-c1d54FZq2YXV8jBKLSRmut4/view?usp=shari
     כלומר, נתונים רק עבור game_id אחד.  
     הציגו 5 איברים ראשונים מרשימה זו.
 
+    ```{r}
+    kobeThreeShots = kobe[kobe$shot_type == "3PT Field Goal", c("game_id", "shot_made_flag")];
+    head(kobeThreeShots, n = 5);
+    game_ids = unique(kobeThreeShots$game_id);
+    kobeThreeShotsByGameId = Map(function(game_id) { return (kobeThreeShots[kobeThreeShots$game_id == game_id, ]);}, game_ids)
+    names(kobeThreeShotsByGameId) = game_ids;
+    head(kobeThreeShotsByGameId, n = 5);
+    ```
 
 3. סעיף ג׳ (15 נקודות):  
 כתבו פונקציה count_events שיודעת לקבל וקטור עם ערכי shot_made_flag עבור משחק אחד, ולהחזיר וקטור (או מטריצה) עם ארבעת הערכים הבאים לפי הסדר הזה:  
@@ -73,6 +85,26 @@ https://drive.google.com/file/d/1eS7Tf7lM-c1d54FZq2YXV8jBKLSRmut4/view?usp=shari
         > matrix_events[4] # counting 0,0 events
         [1] 1
         ```
+    
+    ```{r}
+    count_events = function (shot_made_flags) {
+      n = length(shot_made_flags);
+      vec = shot_made_flags[1:(n-1)];
+      vec_off = shot_made_flags[2:n] # create offset of 1 between vec and vec_off
+      counts = rep(c(0), 4);
+      counts[1] = sum(((!is.na(vec))&vec==1)&((!is.na(vec_off))&vec_off==1)) # count 1,1 events
+      counts[2] = sum(((!is.na(vec))&vec==0)&((!is.na(vec_off))&vec_off==1)) # count 0,1 events
+      counts[3] = sum(((!is.na(vec))&vec==1)&((!is.na(vec_off))&vec_off==0)) # count 1,0 events
+      counts[4] = sum(((!is.na(vec))&vec==0)&((!is.na(vec_off))&vec_off==0)) # count 0,0 events
+      return (counts);
+    }
+    vec = c(1, 0, NA, 1, 0, 0, 1, 0);
+    matrix_events = count_events(vec);
+    matrix_events[1]; # Should be 0
+    matrix_events[2]; # Should be 1
+    matrix_events[3]; # Should be 3
+    matrix_events[4]; # Should be 1
+    ```
 
 4. סעיף ד׳ (15 נקודות):  
   כתבו פונקציה count_events_all_games שיודעת לקבל את הרשימה (list) מסעיף ב׳ ולהחזיר:  
@@ -90,11 +122,76 @@ https://drive.google.com/file/d/1eS7Tf7lM-c1d54FZq2YXV8jBKLSRmut4/view?usp=shari
     הדרכה: על פונקציה זו לקרוא לפונקציה מסעיף ג׳ עם ערכי shot_made_flag (מעורבבים או לא לפי Permutation_flag) עבור כל משחק בודד, ואז לסכום את כל הערכים המתקבלים עבור כל המשחקים שעומדים בתנאי של MinimumNumber3PT.  
     לאחר הסכימה על פונקציה זו לחשב את הסיכויים המתוארים ב- (א) ו- (ב) למעלה.
 
-5.  סעיף ה׳ (15 נקודות):  
-  בעזרת הפונקציה מסעיף ד׳, עבור כל המשחקים שעומדים בתנאי של MinimumNumber3PT=2, חשבו (א) את הסיכוי שזריקה לשלוש תיכנס לסל בהינתן שהזריקה הקודמת לשלוש נכנסה לסל, ו- (ב) את הסיכוי שזריקה לשלוש תיכנס לסל בהינתן שהזריקה הקודמת לשלוש לא נכנסה לסל.  
-  האם התוצאות מרמזות על אפשרות של יד חמה או אנטי-יד חמה?  
-  על מנת לבדוק אם התוצאה ב- (1) משמעותית סטטיסטית, חזרו על (1), אבל הפעם עם מבחן פרמוטציות. בצעו 1000 פרמוטציות ועבור כל פרמוטציה חשבו את ההפרש בין הסיכויים: הסיכוי המתואר ב- (ב) פחות הסיכוי המתואר ב-(א).  
-  כמה פעמים ההפרש הזה היה גדול או שווה להפרש שהתקבל בנתונים הלא מעורבבים (non permutated)?  
-  נסחו מהי השערת האפס.  
-  על סמך מבחן הפרמוטציות, מהו ה- p-value והאם צריך לדחות את השערת האפס?    
 
+    ```{r}
+    count_events_all_games = function(SplitTable, MinimumNumber3PT, Permutation_flag) {
+      eventsSum = Reduce(function(agg, game_info) {
+        shot_made_flags = game_info$shot_made_flag;
+        if (Permutation_flag) {
+          shot_made_flags = sample(game_info$shot_made_flag);
+        }
+        number3PT = length(shot_made_flags);
+
+        events = rep(c(0), 4);
+        if (number3PT >= MinimumNumber3PT) {
+          events = count_events(shot_made_flags);
+        }
+
+        return (agg + events);
+      }, SplitTable, rep(c(0), 4));
+
+      sumOfFirstHit = eventsSum[1] + eventsSum[3];
+
+      return (
+        list(
+          probability_of_hit_after_hit = eventsSum[1] / sumOfFirstHit,
+          probability_of_hit_after_miss = eventsSum[3] / sumOfFirstHit
+        )
+      );
+    }
+
+    # Test
+    count_events_all_games(kobeThreeShotsByGameId, 3, TRUE);
+    ```
+
+5.  סעיף ה׳ (15 נקודות):  
+    1. בעזרת הפונקציה מסעיף ד׳, עבור כל המשחקים שעומדים בתנאי של MinimumNumber3PT=2, חשבו (א) את הסיכוי שזריקה לשלוש תיכנס לסל בהינתן שהזריקה הקודמת לשלוש נכנסה לסל, ו- (ב) את הסיכוי שזריקה לשלוש תיכנס לסל בהינתן שהזריקה הקודמת לשלוש לא נכנסה לסל.  
+    האם התוצאות מרמזות על אפשרות של יד חמה או אנטי-יד חמה?  
+        ```{r}
+        (original_probability = count_events_all_games(kobeThreeShotsByGameId, 2, FALSE));
+        ```
+        התוצאות מרמזות על אנטי-יד חמה.  
+    2. על מנת לבדוק אם התוצאה ב- (1) משמעותית סטטיסטית, חזרו על (1), אבל הפעם עם מבחן פרמוטציות. בצעו 1000 פרמוטציות ועבור כל פרמוטציה חשבו את ההפרש בין הסיכויים: הסיכוי המתואר ב- (ב) פחות הסיכוי המתואר ב-(א).  
+    כמה פעמים ההפרש הזה היה גדול או שווה להפרש שהתקבל בנתונים הלא מעורבבים (non permutated)?  
+    נסחו מהי השערת האפס.  
+    על סמך מבחן הפרמוטציות, מהו ה- p-value והאם צריך לדחות את השערת האפס?    
+        ```{r}
+        set.seed(1);
+        numOfPerm = 1000;
+        permutated_probabilities = Reduce(
+          function(agg, index) {
+            permutated_probability = count_events_all_games(kobeThreeShotsByGameId, 2, TRUE);
+            if (is.null(agg)) {
+              return (permutated_probability);
+            }
+
+            return (
+              list(
+                probability_of_hit_after_hit = append(agg$probability_of_hit_after_hit, permutated_probability$probability_of_hit_after_hit),
+                probability_of_hit_after_miss = append(agg$probability_of_hit_after_miss, permutated_probability$probability_of_hit_after_miss)
+              )
+            )
+          },
+          1:numOfPerm,
+          NULL
+        );
+        original_diff = original_probability$probability_of_hit_after_miss - original_probability$probability_of_hit_after_hit;
+        permutated_diffs = permutated_probabilities$probability_of_hit_after_miss - permutated_probabilities$probability_of_hit_after_hit;
+        times_permutated_was_bigger = sum(permutated_diffs >= original_diff);
+        
+        H = times_permutated_was_bigger;
+        pValue = (H + 1) / numOfPerm;
+        pValue;
+        ```
+        קודם כל עלינו להבין כי ההפרש מוגדר אנטי-יד חמה פחות יד חמה.  
+        כעת מבחן הפרמוטציות היה בעל השערת אפס כי אין אנטי-יד חמה, בגלל שקיבלנו p-value גדול מ-0.05 לא ניתן לאשש את ההשערה האלטרנטיבית ולפסול את השערת האפס.  
