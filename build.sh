@@ -1,1 +1,1 @@
-R -e "library(rmarkdown); render(\"./test/question-1.Rmd\")"
+R -e "library(rmarkdown); render(\"./project/index.Rmd\")"

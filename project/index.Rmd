@@ -1,0 +1,50 @@
+---
+title: "Project"
+author: "Yuval Saraf and Tomer Yablonski"
+date: "05/08/2020"
+output: html_document
+---
+
+# Introduction
+
+# Collecting the data
+```sql
+select 
+	e.id, e.name,
+	et.name "exercise type",
+	(
+		select string_agg(a.name, ',')
+		from exercise_attributes_attribute ea
+		inner join attribute a 
+			on a.id = ea."attributeId"
+		where ea."exerciseId" = e.id
+	) "attributes",
+	COALESCE(
+		(
+			select round(avg((weph.data ->> 'duration')::int))
+			from workout_exercise we
+			inner join workout_exercise_play_history weph
+				on we.id = weph."workoutExerciseId"
+			where we."exerciseId" = e.id
+		),
+		(e.data -> 'playData' ->> 'seconds')::int,
+		(
+			(e.data -> 'playData' ->> 'rounds')::int * ((e.data -> 'playData' -> 'intervals' -> 0 ->> 'seconds')::int) + 
+			((e.data -> 'playData' ->> 'rounds')::int - 1) * ((e.data -> 'playData' -> 'intervals' -> 1 ->> 'seconds')::int)
+		),
+		(e.data -> 'additionalData' ->> 'expectedDuration')::int,
+		(e.data -> 'additionalData' ->> 'expectedDurationPerRep')::int * (e.data -> 'playData' ->> 'reps')::int
+	) "duration",
+	(
+		select count(1)
+		from workout_exercise we
+		inner join workout_exercise_play_history weph
+			on we.id = weph."workoutExerciseId"
+		where we."exerciseId" = e.id
+	) "play"
+from exercise e
+inner join exercise_type et
+	on e."exerciseTypeId" = et.id
+where e.id <= 113 
+order by e.id asc
+```
