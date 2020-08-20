@@ -5,15 +5,54 @@ date: "05/08/2020"
 output: html_document
 ---
 
+### Dependencies
+```{r}
+library(rpart);
+library(rpart.plot);
+```
 # Introduction
+## The app
+[Rockup!](https://rockup.uvop-software.com) is a social app (links to [iOS](https://apps.apple.com/us/app/rockup/id1299641152) and [Android](https://play.google.com/store/apps/details?id=com.hangboardcoach&hl=en) apps) for rock climbing.  
+Rockup! was made by Yuval at the start of his studies, and was kept a side project throughout the years.  
+Tomer, which also climbs and uses the app, helped inspire some of the features that are in the app today.  
+The app have been evolved quite a lot since the beginning, it started as a simple timer for a specific exercise climbers do, and today is a social media platform for working out.  
+<img src="asset/2020-08-19-16-44-46.png" style="height: 400px;">
 
-# Collecting the data
+## Motivation
+So since the start of the R class we decided that Rockup! would be a perfect candidate for our project.  
+Rockup! was still on version 4 (no social features) at the start of the semester, and version 5 (social features and data) was couple of months to go.
+But once version 5 released, we get to do statistical test on real data, and implement the results right away.  
+The only issue was, on what is the data that we want to predict.
+
+## Prediction - difficulty
+So Rockup! finally was finally made a social media platform, and all the previous exercises were migrated to the main database (PostgreSQL).  
+<img src="asset/2020-08-19-16-55-59.png" style="height: 150px; width: auto;">  
+Through the migration something was missing.  
+Previously the difficulty of each exercise which determined how much experience the user will gain upon completion (gamification, helps motivate to workout), was set manually by us.  
+
+> This raises the question whether the difficulty can be set as a number even though it's different for each individual.  
+> In rock climbing, we have different grades for each "problem": (For example, Kisra park in Israel)  
+> <img src="asset/2020-08-19-17-41-51.png" style="height: 250px; width: auto;">  
+> Those grades a determined by the people who climb the rock, and the grade system is the same throughout the world.  
+> Even though we can agree that those grades are probably not accurate and vary for each person and each route, it helps people who are new to the area to choose their workout accordingly.  
+
+We needed a way to determine the difficulty of new exercises the users create (a new feature to this version).  
+We are asking users who complete the exercise for the first time what is the difficulty of the exercise, but until we have enough data to decide that value, those users don't gain experience for the exercise.  
+To tackle that problem we decided to use this project to develop a prediction algorithm for new exercises, to make sure we have difficulty set for all exercises at all time, and as time progresses, more "weight" will be given to users' feedback instead of the algorithm result for the exercise's difficulty value.  
+
+## Collecting data
+So as mentioned earlier, the main database is now PostgreSQL, and that makes it so easy to query and recollect the data.  
+Since this project is basically R code, and the data is a SQL query, once we have more exercises and users we can simply rerun the query and rerun this R file a get a new algorithm.  
+We are aware that the amount of data is low right now, but the ability to rerun this project and update the algorithm is great.  
+Here is the SQL query for the data (not very optimized but that's ok):  
 ```sql
 select 
-	e.id, e.name,
+	e.id,
+	e.name,
 	et.name "exercise type",
+  e.difficulty,
 	(
-		select string_agg(a.name, ',')
+		select string_agg(a.name, '|')
 		from exercise_attributes_attribute ea
 		inner join attribute a 
 			on a.id = ea."attributeId"
@@ -34,17 +73,293 @@ select
 		),
 		(e.data -> 'additionalData' ->> 'expectedDuration')::int,
 		(e.data -> 'additionalData' ->> 'expectedDurationPerRep')::int * (e.data -> 'playData' ->> 'reps')::int
-	) "duration",
+	)::int "duration",
 	(
 		select count(1)
 		from workout_exercise we
 		inner join workout_exercise_play_history weph
 			on we.id = weph."workoutExerciseId"
 		where we."exerciseId" = e.id
-	) "play"
+	)::int "play",
+	COALESCE(
+    (
+      select round(avg((
+        select COALESCE(sum(uae.exp), 0)
+        from user_attribute_exp uae
+        where uae."userId" = wph."userId"
+      )))
+      from workout_exercise we
+      inner join workout_exercise_play_history weph
+        on we.id = weph."workoutExerciseId"
+      inner join workout_play_history wph
+        on weph."workoutExerciseId" = wph."id"
+      where we."exerciseId" = e.id
+    ),
+    0
+  )::int "Average total exp",
+	COALESCE(
+    (
+      select round(avg((
+        select COALESCE(sum(uae.exp), 0)
+        from user_attribute_exp uae
+        where uae."userId" = wph."userId"
+        and uae."attributeId" = 1
+      )))
+      from workout_exercise we
+      inner join workout_exercise_play_history weph
+        on we.id = weph."workoutExerciseId"
+      inner join workout_play_history wph
+        on weph."workoutExerciseId" = wph."id"
+      where we."exerciseId" = e.id
+    ),
+    0
+  )::int "Average Finger Strength exp",
+	COALESCE(
+    (
+      select round(avg((
+        select COALESCE(sum(uae.exp), 0)
+        from user_attribute_exp uae
+        where uae."userId" = wph."userId"
+        and uae."attributeId" = 2
+      )))
+      from workout_exercise we
+      inner join workout_exercise_play_history weph
+        on we.id = weph."workoutExerciseId"
+      inner join workout_play_history wph
+        on weph."workoutExerciseId" = wph."id"
+      where we."exerciseId" = e.id
+    ),
+    0
+  )::int "Average Power exp",
+	COALESCE(
+    (
+      select round(avg((
+        select COALESCE(sum(uae.exp), 0)
+        from user_attribute_exp uae
+        where uae."userId" = wph."userId"
+        and uae."attributeId" = 3
+      )))
+      from workout_exercise we
+      inner join workout_exercise_play_history weph
+        on we.id = weph."workoutExerciseId"
+      inner join workout_play_history wph
+        on weph."workoutExerciseId" = wph."id"
+      where we."exerciseId" = e.id
+    ),
+    0
+  )::int "Average Endurance exp",
+	COALESCE(
+    (
+      select round(avg((
+        select COALESCE(sum(uae.exp), 0)
+        from user_attribute_exp uae
+        where uae."userId" = wph."userId"
+        and uae."attributeId" = 4
+      )))
+      from workout_exercise we
+      inner join workout_exercise_play_history weph
+        on we.id = weph."workoutExerciseId"
+      inner join workout_play_history wph
+        on weph."workoutExerciseId" = wph."id"
+      where we."exerciseId" = e.id
+    ),
+    0
+  )::int "Average Flexibility exp",
+	COALESCE(
+    (
+      select round(avg((
+        select COALESCE(sum(uae.exp), 0)
+        from user_attribute_exp uae
+        where uae."userId" = wph."userId"
+        and uae."attributeId" = 5
+      )))
+      from workout_exercise we
+      inner join workout_exercise_play_history weph
+        on we.id = weph."workoutExerciseId"
+      inner join workout_play_history wph
+        on weph."workoutExerciseId" = wph."id"
+      where we."exerciseId" = e.id
+    ),
+    0
+  )::int "Average Fitness exp"
 from exercise e
 inner join exercise_type et
 	on e."exerciseTypeId" = et.id
-where e.id <= 113 
+where e.difficulty is not null
 order by e.id asc
 ```
+```{r}
+data = read.csv('data-1596719354676.csv');
+head(data);
+```
+
+# Tests
+## Manipulate the data
+Firstly, we will change add some columns to the dataframe to suit our tests better.  
+Currently we have Average exp for each attribute, now will will merge those to single "average relevant exp".  
+```{r}
+dataColNames = colnames(data);
+data$Average.relevant.exp = apply(data, 1, function(row) {
+  attributesStr = row[5];
+  attributes = unlist(strsplit(attributesStr, "\\|"));
+  exps = as.numeric(unname(unlist(Map(function(attribute) {
+    attributeColName = paste("Average.", gsub(" ", ".", attribute), ".exp", sep = "");
+    index = which(dataColNames == attributeColName);
+    return (row[index]);
+  }, attributes))));
+  exp = sum(exps);
+  return (exp);
+});
+summary(data);
+```
+
+## Selecting the tests
+We decided to use decision tree and multiple linear regression tests.  
+Decision tree test is great for visualizing the algorithm which decides the exercise's difficulty.  
+Multiple linear regression test can be somewhat inconsistent compared to decision tree (is explained down bellow) but is great for implementation in the app.
+
+## Decision tree
+```{r}
+set.seed(1);
+n = nrow(data);
+datas = data[sample(n),];
+
+# Split the data in train and test
+train_indices = 1:round(0.7 * n);
+train = datas[train_indices, ];
+test_indices = (round(0.7 * n) + 1):n;
+test = datas[test_indices, ];
+tree = rpart(difficulty ~ duration + Average.total.exp + Average.relevant.exp, data = train, method = 'anova', minsplit=2, minbucket=5);
+rpart.plot(tree);
+
+
+```
+
+## Multiple linear regression
+Since the user picks which type of exercise it is before publishing the exercise, we can split the split the data to different types and develop an algorithm for each type.  
+After the first user completes the exercise, the difficulty will be decided by the time it took him (duration), his total experience and relevant experience.  
+As for the algorithms themselves, we chose to use multiple linear regression test as it's very simple to implement later in the app.  
+
+* ### Model - Time type
+  ```{r}
+  mlrTimeModel <- lm(difficulty ~ duration + Average.total.exp + Average.relevant.exp, data = data[data$exercise.type == "Time", ])
+  summary(mlrTimeModel);
+  ```
+  The confidence interval of the model coefficient can be extracted as follow:  
+  ```{r}
+  confint(mlrTimeModel);
+  ```  
+  That's why our model equation is  
+  ```{r echo=FALSE}
+  parameters = summary(mlrTimeModel)$coefficients[,1];
+  ```
+  difficulty = (`r parameters[1]`) + duration * (`r parameters[2]`) + totalExp * (`r parameters[3]`) + relevantExp * (`r parameters[4]`);
+  
+* Repetitions 
+  ```{r}
+  mlrRepetitionsModel <- lm(difficulty ~ duration + Average.total.exp + Average.relevant.exp, data = data[data$exercise.type == "Repetitions", ])
+  summary(mlrRepetitionsModel);
+  ```
+  The confidence interval of the model coefficient can be extracted as follow:  
+  ```{r}
+  confint(mlrRepetitionsModel);
+  ```
+  That's why our model equation is  
+  ```{r echo=FALSE}
+  parameters = summary(mlrRepetitionsModel)$coefficients[,1];
+  ```
+  difficulty = (`r parameters[1]`) + duration * (`r parameters[2]`) + totalExp * (`r parameters[3]`) + relevantExp * (`r parameters[4]`);
+
+* Interval
+  ```{r}
+  mlrIntervalModel <- lm(difficulty ~ duration + Average.total.exp + Average.relevant.exp, data = data[data$exercise.type == "Interval", ])
+  summary(mlrIntervalModel);
+  ```
+  The confidence interval of the model coefficient can be extracted as follow:  
+  ```{r}
+  confint(mlrIntervalModel);
+  ```
+  That's why our model equation is  
+  ```{r echo=FALSE}
+  parameters = summary(mlrIntervalModel)$coefficients[,1];
+  ```
+  difficulty = (`r parameters[1]`) + duration * (`r parameters[2]`) + totalExp * (`r parameters[3]`) + relevantExp * (`r parameters[4]`);
+
+* No interaction
+  ```{r}
+  mlrNoInteractionModel <- lm(difficulty ~ duration + Average.total.exp + Average.relevant.exp, data = data[data$exercise.type == "No interaction", ])
+  summary(mlrNoInteractionModel);
+  ```
+  The confidence interval of the model coefficient can be extracted as follow:  
+  ```{r}
+  confint(mlrNoInteractionModel);
+  ```
+  That's why our model equation is  
+  ```{r echo=FALSE}
+  parameters = summary(mlrNoInteractionModel)$coefficients[,1];
+  ```
+  difficulty = (`r parameters[1]`) + duration * (`r parameters[2]`) + totalExp * (`r parameters[3]`) + relevantExp * (`r parameters[4]`);  
+
+### Models accuracy assessment
+The overall quality of the model can be assessed by examining the R-squared (R2) and Residual Standard Error (RSE).  
+
+##### R-squared  
+```{r}
+summary(mlrTimeModel)$r.squared;
+summary(mlrRepetitionsModel)$r.squared;
+summary(mlrIntervalModel)$r.squared;
+summary(mlrNoInteractionModel)$r.squared;
+```
+In multiple linear regression, the R2 represents the correlation coefficient between the observed values of the outcome variable (difficulty) and the fitted (i.e., predicted) values of the difficulty.  
+For this reason, the value of R will always be positive and will range from zero to one.  
+R2 represents the proportion of variance, in the outcome variable difficulty, that may be predicted by knowing the value of the predict variables.  
+An R2 value close to 1 indicates that the model explains a large portion of the variance in the outcome variable.  
+A problem with the R2, is that, it will always increase when more variables are added to the model, even if those variables are only weakly associated with the response.  
+A solution is to adjust the R2 by taking into account the number of predictor variables.  
+The adjustment in the “Adjusted R Square” value in the summary output is a correction for the number of variables included in the prediction model.  
+In our Time model for example, with duration, total experience and relevant experience predictor variables, the adjusted R2 = `r summary(mlrTimeModel)$r.squared`, meaning that “`r summary(mlrTimeModel)$r.squared * 100`% of the variance in the measure of sales can be predicted by duration, total experience and relevant experience values.  
+
+```{r}
+  mlrTimeModel21 <- lm(difficulty ~ Average.total.exp + Average.relevant.exp, data = data[data$exercise.type == "Time", ])
+  mlrTimeModel22 <- lm(difficulty ~ duration + Average.relevant.exp, data = data[data$exercise.type == "Time", ])
+  mlrTimeModel23 <- lm(difficulty ~ duration + Average.total.exp, data = data[data$exercise.type == "Time", ])
+  mlrTimeModel11 <- lm(difficulty ~ duration + duration, data = data[data$exercise.type == "Time", ])
+  mlrTimeModel12 <- lm(difficulty ~ duration + Average.total.exp, data = data[data$exercise.type == "Time", ])
+  mlrTimeModel13 <- lm(difficulty ~ duration + Average.relevant.exp, data = data[data$exercise.type == "Time", ])
+```
+> The model is better than the than any other variant of the predictors (multiple and single linear models) 
+> since it has R2 of `r summary(mlrTimeModel)$r.squared` and the others are - `r summary(mlrTimeModel21)$r.squared`, `r summary(mlrTimeModel22)$r.squared`, `r summary(mlrTimeModel23)$r.squared`, `r summary(mlrTimeModel11)$r.squared`, `r summary(mlrTimeModel12)$r.squared`, `r summary(mlrTimeModel13)$r.squared`.   
+
+##### Residual Standard Error (RSE), or sigma  
+The RSE estimate gives a measure of error of prediction. The lower the RSE, the more accurate the model (on the data in hand).  
+The error rate can be estimated by dividing the RSE by the mean outcome variable:  
+```{r}
+sigma(mlrTimeModel)/mean(data[data$exercise.type == "Time", ]$difficulty);
+sigma(mlrRepetitionsModel)/mean(data[data$exercise.type == "Repetitions", ]$difficulty);
+sigma(mlrIntervalModel)/mean(data[data$exercise.type == "Interval", ]$difficulty);
+sigma(mlrNoInteractionModel)/mean(data[data$exercise.type == "No interaction", ]$difficulty);
+```
+
+> In our multiple regression Time model, the RSE is `r sigma(mlrTimeModel)` corresponding to `r sigma(mlrTimeModel)/mean(data[data$exercise.type == "Time", ]$difficulty)`% error rate.
+>  Again, this is better than the other variants, where the RSE are `r sigma(mlrTimeModel21)` (`r sigma(mlrTimeModel21)/mean(data[data$exercise.type == "Time", ]$difficulty)`% error rate), 
+`r sigma(mlrTimeModel22)` (`r sigma(mlrTimeModel22)/mean(data[data$exercise.type == "Time", ]$difficulty)`% error rate), 
+`r sigma(mlrTimeModel23)` (`r sigma(mlrTimeModel23)/mean(data[data$exercise.type == "Time", ]$difficulty)`% error rate), 
+`r sigma(mlrTimeModel11)` (`r sigma(mlrTimeModel11)/mean(data[data$exercise.type == "Time", ]$difficulty)`% error rate), 
+`r sigma(mlrTimeModel12)` (`r sigma(mlrTimeModel12)/mean(data[data$exercise.type == "Time", ]$difficulty)`% error rate), 
+`r sigma(mlrTimeModel13)` (`r sigma(mlrTimeModel13)/mean(data[data$exercise.type == "Time", ]$difficulty)`% error rate).
+
+# Implementation
+Now once we have those equations for each exercise type, usage is pretty easy.  
+The server is written in NodeJS and is deployed to AWS cloud server.  
+The important bit is where the user sends an event of exercise completion and gains exp for the exercise.  
+Previously, this was the code which calculated the experience:  
+<img src="asset/2020-08-20-05-59-26.png" style="height: 80px;">  
+The code takes the difficulty set for the exercise, multiples it with a predefined factor which converts the scale of the difficulty (1-5) to experience (0-10k for now) 
+and splits it evenly (that's why there is division) between each muscle the exercise is set to workout on.  
+As we can see, difficulty is not always set, and currently only once we reach a set amount of feedbacks on the exercise, the difficulty is automatically set.  
+We want to fix that, so we added that code to the server, and the predictors to the database:  
+<img src="asset/2020-08-20-05-55-09.png" style="width: 700px;">   
+Now there is never a time where a user isn't rewarded for a workout, and when there is enough feedback from the users about the said exercise, it will use their feedback instead.  
+We should mention that the predictors aren't hardcoded to the server, and rerunning this R code and updating the values inside the configuration table (used by ConfigurationRepository) is enough to update the model's equation.  
+And Voila! Now even new exercises rewards the users with experience!  
+<img src="asset/2020-08-20-06-08-19.png" style="width: 300px;">   

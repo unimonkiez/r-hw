@@ -1,0 +1,114 @@
+"id","name","exercise type","difficulty","attributes","duration","play","Average total exp","Average Finger Strength exp","Average Power exp","Average Endurance exp","Average Flexibility exp","Average Fitness exp"
+1,"Boulder","No interaction",3,"Power|Endurance",10,0,0,0,0,0,0,0
+2,"Definition wall","Repetitions",3,"Endurance",22,83,804,157,51,45,263,287
+3,"Lead","No interaction",4,"Power|Endurance|Fitness",10,0,0,0,0,0,0,0
+4,"Freestyle handboard","Interval",2,"Finger Strength",76,66,60,0,0,0,60,0
+5,"Hang edge easy","Interval",1,"Finger Strength",52,122,410,400,0,0,10,0
+6,"Hang edge extreme","Interval",5,"Finger Strength",60,48,84,29,55,0,0,0
+7,"Hang edge hard","Interval",3,"Finger Strength",56,59,388,326,0,36,26,0
+8,"Hang edge medium","Interval",2,"Finger Strength",51,197,176,114,1,10,33,18
+9,"Hang slope easy","Interval",2,"Finger Strength",91,17,155,75,80,0,0,0
+10,"Hang slope extreme","Interval",5,"Finger Strength",67,14,35,35,0,0,0,0
+11,"Hang slope hard","Interval",4,"Finger Strength",60,33,789,237,115,285,110,43
+12,"Hang slope medium","Interval",3,"Finger Strength",40,3,0,0,0,0,0,0
+13,"Hang three back finger easy","Interval",2,"Finger Strength",25,0,0,0,0,0,0,0
+14,"Hang three back finger extreme","Interval",5,"Finger Strength",25,0,0,0,0,0,0,0
+15,"Hang three back finger hard","Interval",4,"Finger Strength",67,14,1430,540,75,740,0,75
+16,"Hang three back finger medium","Interval",3,"Finger Strength",56,54,227,0,6,20,194,6
+17,"Hang three front finger easy","Interval",2,"Finger Strength",61,1,0,0,0,0,0,0
+18,"Hang three front finger extreme","Interval",5,"Finger Strength",25,0,0,0,0,0,0,0
+19,"Hang three front finger hard","Interval",4,"Finger Strength",67,15,1430,540,75,740,0,75
+20,"Hang three front finger medium","Interval",3,"Finger Strength",56,44,260,7,8,0,237,8
+21,"Hang two back finger easy","Interval",3,"Finger Strength",25,0,0,0,0,0,0,0
+22,"Hang two back finger extreme","Interval",5,"Finger Strength",25,0,0,0,0,0,0,0
+23,"Hang two back finger hard","Interval",5,"Finger Strength",63,20,352,352,0,0,0,0
+24,"Hang two back finger medium","Interval",4,"Finger Strength",25,0,0,0,0,0,0,0
+25,"Hang two front finger easy","Interval",2,"Finger Strength",60,15,1430,540,75,740,0,75
+26,"Hang two front finger extreme","Interval",5,"Finger Strength",25,0,0,0,0,0,0,0
+27,"Hang two front finger hard","Interval",4,"Finger Strength",67,9,640,640,0,0,0,0
+28,"Hang two front finger medium","Interval",3,"Finger Strength",57,9,60,0,0,60,0,0
+29,"Hang two middle finger easy","Interval",2,"Finger Strength",59,14,224,224,0,0,0,0
+30,"Hang two middle finger extreme","Interval",5,"Finger Strength",25,0,0,0,0,0,0,0
+31,"Hang two middle finger hard","Interval",4,"Finger Strength",67,10,640,640,0,0,0,0
+32,"Hang two middle finger medium","Interval",3,"Finger Strength",25,0,0,0,0,0,0,0
+33,"Elbow rotation stretch","Time",1,"Flexibility",40,28,1068,99,206,0,483,279
+34,"Tricep strech","Time",1,"Flexibility",45,24,879,226,116,0,496,41
+35,"Shoulder lats stretch","Time",1,"Flexibility",30,24,432,171,0,0,261,0
+36,"Shoulder lats side stretch","Time",1,"Flexibility",45,24,331,159,35,0,138,0
+37,"Shoulder pectoral strech","Time",1,"Flexibility",45,22,702,315,119,0,173,95
+38,"Hands behind back strech","Time",1,"Flexibility",45,22,569,288,109,0,173,0
+39,"Middle back lats stretch","Time",1,"Flexibility",46,32,343,316,27,0,0,0
+40,"Forarm upper back stretch","Time",1,"Flexibility",26,15,76,38,38,0,0,0
+41,"The bagel shoulder strech","Time",1,"Flexibility",55,13,371,58,121,0,192,0
+42,"Lower back stretch","Time",1,"Flexibility",29,21,1411,1233,69,0,109,0
+43,"Hips stretch","Time",1,"Flexibility",30,42,1133,385,72,0,0,676
+44,"Spreaded legs side strech","Time",1,"Flexibility",40,28,1162,320,81,0,0,761
+45,"Split stretch","Time",1,"Flexibility",30,26,0,0,0,0,0,0
+46,"Hips and glutes stretch","Time",1,"Flexibility",49,35,38,0,4,14,2,18
+47,"Hips and quads stretch","Time",1,"Flexibility",47,30,0,0,0,0,0,0
+48,"Quads stretch","Time",1,"Flexibility",33,30,412,65,134,0,213,0
+49,"Standing tucked glutes stretch","Time",1,"Flexibility",30,25,20,10,10,0,0,0
+50,"Standing glutes stretch","Time",1,"Flexibility",30,24,57,57,0,0,0,0
+51,"Leg back stretch","Time",1,"Flexibility",40,22,57,57,0,0,0,0
+52,"Jumping jacks","Time",1,"Fitness",33,12,5,0,5,0,0,0
+53,"Wall sit","Time",1,"Fitness",30,10,0,0,0,0,0,0
+54,"Push ups","Repetitions",2,"Power|Fitness",28,57,105,67,30,2,6,0
+55,"Wide push ups","Repetitions",2,"Power|Fitness",29,31,221,221,0,0,0,0
+56,"Triceps push ups","Time",2,"Power|Fitness",22,30,1608,373,108,455,554,118
+57,"Crunches","Time",2,"Power|Fitness",42,22,914,43,95,5,657,115
+58,"Step ups","Time",1,"Fitness",30,10,35,35,0,0,0,0
+59,"Squats","Time",1,"Fitness",30,10,0,0,0,0,0,0
+60,"Dips","Time",2,"Power|Fitness",30,19,939,36,32,0,750,121
+61,"Plank","Time",3,"Fitness",56,72,1575,746,0,0,829,0
+62,"High knees","Time",3,"Fitness",30,10,2280,2280,0,0,0,0
+63,"Lunges","Time",1,"Fitness",30,10,2280,2280,0,0,0,0
+64,"Walking push ups","Time",2,"Power|Fitness",30,10,2280,2280,0,0,0,0
+65,"Pull ups","Repetitions",3,"Power|Fitness",76,17,110,0,40,17,13,40
+66,"Chin ups","Repetitions",3,"Power|Fitness",23,19,0,0,0,0,0,0
+67,"Deep crunches","Repetitions",3,"Power|Fitness",36,4,270,270,0,0,0,0
+68,"Power ball crunches","Repetitions",2,"Power|Fitness",26,4,0,0,0,0,0,0
+69,"Hanging leg lifts","Repetitions",2,"Power|Fitness",26,4,30,0,30,0,0,0
+70,"Weighted crunches","Repetitions",2,"Power|Fitness",20,5,90,45,45,0,0,0
+71,"Front lever","Repetitions",3,"Power|Fitness",19,4,1430,540,75,740,0,75
+72,"Windshield wipers","Time",2,"Power|Fitness",30,11,1261,1261,0,0,0,0
+73,"One arm pull ups","No interaction",5,"Power",13,5,171,129,42,0,0,0
+74,"Freestyle campus","No interaction",2,"Finger Strength|Power",10,0,0,0,0,0,0,0
+75,"Campus matches 1-2-3-4-5","No interaction",1,"Finger Strength|Power",14,8,1261,1261,0,0,0,0
+76,"Campus ladder","No interaction",2,"Finger Strength|Power",27,30,773,124,65,40,484,61
+77,"Campus reaches","Repetitions",2,"Finger Strength|Power",20,14,883,88,59,51,607,77
+78,"Campus two moves highest reach","No interaction",2,"Finger Strength|Power",36,31,1528,108,6,619,0,794
+79,"Campus ladder lockoff","No interaction",2,"Finger Strength|Power",13,8,128,11,11,105,0,0
+80,"Campus doubles","No interaction",2,"Finger Strength|Power",24,14,331,100,13,17,176,26
+81,"Campus one handed bumps","No interaction",3,"Finger Strength|Power",29,17,203,82,121,0,0,0
+82,"Campus slow ladder","No interaction",3,"Finger Strength|Power",3,5,1446,432,98,0,517,399
+83,"Medium rang hang","Time",1,"Finger Strength",11,11,173,80,43,0,42,8
+84,"Medium rang pull up","Repetitions",3,"Finger Strength|Power",14,6,80,65,15,0,0,0
+85,"Small rang hang","Time",3,"Finger Strength",30,0,0,0,0,0,0,0
+86,"Small rang pull up","Repetitions",3,"Finger Strength|Power",11,10,353,121,26,0,0,206
+87,"Small rang weighted pull up","Repetitions",4,"Finger Strength|Power",15,1,752,0,66,0,0,686
+88,"Lock off - straight arms","Time",3,"Power",10,7,218,49,71,0,99,0
+89,"Lock off - 120° lock","Time",3,"Power",30,0,0,0,0,0,0,0
+90,"Lock off - 90° lock","Time",3,"Power",9,14,448,334,28,0,33,53
+91,"Lock off - full lock","Time",3,"Power",30,0,0,0,0,0,0,0
+92,"Pull up then Campus explosive doubles","No interaction",2,"Finger Strength|Power",7,2,752,0,66,0,0,686
+93,"Fast pull ups","Repetitions",2,"Power|Fitness",20,0,0,0,0,0,0,0
+94,"Frenchies one arm - full lock","Time",5,"Power",5,66,695,209,0,218,12,256
+95,"Frenchies one arm - 90° lock","Time",5,"Power",5,47,105,79,1,0,26,0
+96,"Frenchies one arm - 120° lock","Time",5,"Power",5,44,218,175,18,0,25,0
+97,"One slow pull up","Time",3,"Power",8,49,433,251,43,0,5,134
+98,"Campus highest one move","No interaction",2,"Finger Strength|Power",17,14,456,437,11,0,9,0
+99,"Campus reaches and stay","Repetitions",2,"Finger Strength|Power",13,6,1273,179,92,0,425,577
+100,"Campus cycle","Repetitions",2,"Finger Strength|Power",23,6,599,459,63,0,77,0
+101,"Campus matches 1-3-5-7","Repetitions",3,"Finger Strength|Power",1,4,562,367,80,0,115,0
+102,"Campus snatches","No interaction",3,"Finger Strength|Power",9,32,1690,70,90,120,1230,180
+103,"Campus ladder lockoff","No interaction",3,"Finger Strength|Power",6,35,178,46,0,0,132,0
+104,"Campus two moves highest reach","No interaction",3,"Finger Strength|Power",5,53,659,2,2,443,212,0
+105,"Campus offset highest reach","No interaction",3,"Finger Strength|Power",6,7,57,57,0,0,0,0
+106,"Campus doubles up-down","No interaction",3,"Finger Strength|Power",53,19,140,55,5,6,65,9
+107,"Campus higher than highest reach","No interaction",3,"Finger Strength|Power",0,4,57,57,0,0,0,0
+108,"Toes to bar","Repetitions",2,"Power|Fitness",97,3,0,0,0,0,0,0
+109,"Bicycles","Repetitions",2,"Fitness",62,32,417,104,0,0,313,0
+110,"Flutter kicks","Repetitions",2,"Fitness",40,30,1247,595,32,0,548,72
+111,"Leg lifts","Repetitions",2,"Fitness",77,32,221,221,0,0,0,0
+112,"Side plank dips","Time",1,"Fitness",60,30,24,22,3,0,0,0
+113,"Supermans","Time",2,"Fitness",60,26,1681,357,104,437,653,129
