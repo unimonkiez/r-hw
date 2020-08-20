@@ -219,20 +219,44 @@ Decision tree test is great for visualizing the algorithm which decides the exer
 Multiple linear regression test can be somewhat inconsistent compared to decision tree (is explained down bellow) but is great for implementation in the app.
 
 ## Decision tree
+Before we train our model, we need to create a train and test set: We train the model on the train set and test the prediction on the test set (i.e. unseen data).  
+The common practice is to split the data 80/20, 80 percent of the data serves to train the model, and 20 percent to make predictions.  
+We need to create two separate data frames for that.  
+We don't want to touch the test set until you finish building your model.  
+
 ```{r}
 set.seed(1);
 n = nrow(data);
 datas = data[sample(n),];
 
 # Split the data in train and test
-train_indices = 1:round(0.7 * n);
+trainAndTestRelation = 0.8;
+train_indices = 1:round(trainAndTestRelation * n);
 train = datas[train_indices, ];
-test_indices = (round(0.7 * n) + 1):n;
+test_indices = (round(trainAndTestRelation * n) + 1):n;
 test = datas[test_indices, ];
-tree = rpart(difficulty ~ duration + Average.total.exp + Average.relevant.exp, data = train, method = 'anova', minsplit=2, minbucket=5);
+```
+
+We are ready to build the model.  
+```{r}
+tree = rpart(
+  difficulty ~ duration + Average.total.exp + Average.relevant.exp,
+  data = train,
+  method = 'anova',
+  minsplit=2,
+  minbucket=5
+);
+```
+We used rpart library (and later rpart.plot for visualization) to create the model, we'll explain each of the different parameters we used:  
+*  `difficulty ~ duration + Average.total.exp + Average.relevant.exp` - difficulty is the the value to predict, and duration, average total experience, average relevant experience are the predictors.  
+*  `data = train` - We use only the train set to build the model.  
+*  `method = 'anova'` - Since difficulty is a scalar, and not categorical, "anova" method is best fit for it.  
+*  `minsplit=2` - A control variable to make sure there will be not only root node with single decision.  
+*  `minbucket=5` - A control variable to make sure that there won't be too many sub nodes in the tree, won't have a node (or bucket) with less than 5% confidence.  
+
+As for visualization, this line is all we need:  
+```{r}
 rpart.plot(tree);
-
-
 ```
 
 ## Multiple linear regression
