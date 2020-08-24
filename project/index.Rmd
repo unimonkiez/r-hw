@@ -15,19 +15,19 @@ library(rpart.plot);
 [Rockup!](https://rockup.uvop-software.com) is a social app (links to [iOS](https://apps.apple.com/us/app/rockup/id1299641152) and [Android](https://play.google.com/store/apps/details?id=com.hangboardcoach&hl=en) apps) for rock climbing.  
 Rockup! was made by Yuval at the start of his studies, and was kept a side project throughout the years.  
 Tomer, which also climbs and uses the app, helped inspire some of the features that are in the app today.  
-The app have been evolved quite a lot since the beginning, it started as a simple timer for a specific exercise climbers do, and today is a social media platform for working out.  
+The app has been evolving quite a lot since the beginning, it started as a simple timer for a specific exercise climbers do, and today is a social media platform for working out.  
 <img src="asset/2020-08-19-16-44-46.png" style="height: 400px;">
 
 ## Motivation
 So since the start of the R class we decided that Rockup! would be a perfect candidate for our project.  
-Rockup! was still on version 4 (no social features) at the start of the semester, and version 5 (social features and data) was couple of months to go.
+Rockup! was still on version 4 (no social features) at the start of the semester, and version 5 (social features and data) was couple of months to go.  
 But once version 5 released, we get to do statistical test on real data, and implement the results right away.  
 The only issue was, on what is the data that we want to predict.
 
 ## Prediction - difficulty
 So Rockup! finally was finally made a social media platform, and all the previous exercises were migrated to the main database (PostgreSQL).  
 <img src="asset/2020-08-19-16-55-59.png" style="height: 150px; width: auto;">  
-Through the migration something was missing.  
+Through the migration we discovered that something was missing.  
 Previously the difficulty of each exercise which determined how much experience the user will gain upon completion (gamification, helps motivate to workout), was set manually by us.  
 
 > This raises the question whether the difficulty can be set as a number even though it's different for each individual.  
@@ -40,7 +40,7 @@ We needed a way to determine the difficulty of new exercises the users create (a
 We are asking users who complete the exercise for the first time what is the difficulty of the exercise, but until we have enough data to decide that value, those users don't gain experience for the exercise.  
 To tackle that problem we decided to use this project to develop a prediction algorithm for new exercises, to make sure we have difficulty set for all exercises at all time, and as time progresses, more "weight" will be given to users' feedback instead of the algorithm result for the exercise's difficulty value.  
 
-## Collecting data
+# Data
 So as mentioned earlier, the main database is now PostgreSQL, and that makes it so easy to query and recollect the data.  
 Since this project is basically R code, and the data is a SQL query, once we have more exercises and users we can simply rerun the query and rerun this R file a get a new algorithm.  
 We are aware that the amount of data is low right now, but the ability to rerun this project and update the algorithm is great.  
@@ -50,7 +50,7 @@ select
 	e.id,
 	e.name,
 	et.name "exercise type",
-  e.difficulty,
+	e.difficulty,
 	(
 		select string_agg(a.name, '|')
 		from exercise_attributes_attribute ea
@@ -193,10 +193,62 @@ data = read.csv('data-1596719354676.csv');
 head(data);
 ```
 
-# Tests
+# Exploratory data analysis
+To understand the data better, and how to predict difficulty based on other values, let's look at different plots that might shed some light on the data itself
+```{r}
+difficulties = seq(from = 1, to = 5);
+
+plot(
+    x = difficulties,
+    y = unlist(Map(function(difficulty) {
+      return (nrow(data[data$difficulty == difficulty, ]));
+    },difficulties)),
+    main = 'Exercise\'s difficulty spread',
+    xlab = 'Difficulty',
+    ylab = 'Count'
+);
+
+plot(
+    x = difficulties,
+    y = unlist(Map(function(difficulty) {
+      return (sum(data[data$difficulty == difficulty, ]$play));
+    },difficulties)),
+    main = 'Exercise\'s play count',
+    xlab = 'Difficulty',
+    ylab = 'PLay count'
+);
+
+plot(
+    x = difficulties,
+    y = unlist(Map(function(difficulty) {
+      return (median(data[data$difficulty == difficulty, ]$duration));
+    },difficulties)),
+    main = 'Exercise\'s average duration',
+    xlab = 'Difficulty',
+    ylab = 'Average duration'
+);
+
+plot(
+    x = difficulties,
+    y = unlist(Map(function(difficulty) {
+      return (median(data[data$difficulty == difficulty, ]$Average.total.exp));
+    },difficulties)),
+    main = 'Exercise\'s average total experience of users who complete it',
+    xlab = 'Difficulty',
+    ylab = 'Average total experience'
+);
+```
+
+From those plots we can learn 2 things:  
+
+*  Play count as much as it's a relevant data and a good predictor for difficulty, it cannot be used because it cannot be collected upon exercise's creation.  
+*  Difficulty number 4 is not consistent as the rest of the data, but that's is because of the low number of exercises of that difficulty, and it should not matter much when conducting the tests, again, because the low count of that abnormality.  
+
+
+# Inference
 ## Manipulate the data
-Firstly, we will change add some columns to the dataframe to suit our tests better.  
-Currently we have Average exp for each attribute, now will will merge those to single "average relevant exp".  
+Firstly, we will add some columns to the dataframe to suit our tests better.  
+Currently we have Average exp for each attribute, now will will merge those to single "average relevant exp" using the "attributes" column.  
 ```{r}
 dataColNames = colnames(data);
 data$Average.relevant.exp = apply(data, 1, function(row) {
@@ -211,7 +263,19 @@ data$Average.relevant.exp = apply(data, 1, function(row) {
   return (exp);
 });
 summary(data);
+
+plot(
+    x = difficulties,
+    y = unlist(Map(function(difficulty) {
+      return (median(data[data$difficulty == difficulty, ]$Average.relevant.exp));
+    },difficulties)),
+    main = 'Exercise\'s average relevant experience of users who complete it',
+    xlab = 'Difficulty',
+    ylab = 'Average relevant experience'
+);
 ```
+
+Difficulty 4 "sticks" to it's abnormality as expected.  
 
 ## Selecting the tests
 We decided to use decision tree and multiple linear regression tests.  
@@ -242,15 +306,16 @@ We are ready to build the model.
 tree = rpart(
   difficulty ~ duration + Average.total.exp + Average.relevant.exp,
   data = train,
-  method = 'anova',
-  minsplit=2,
-  minbucket=5
+  method = 'class',
+  minsplit = 2,
+  minbucket = 5
 );
 ```
 We used rpart library (and later rpart.plot for visualization) to create the model, we'll explain each of the different parameters we used:  
+
 *  `difficulty ~ duration + Average.total.exp + Average.relevant.exp` - difficulty is the the value to predict, and duration, average total experience, average relevant experience are the predictors.  
 *  `data = train` - We use only the train set to build the model.  
-*  `method = 'anova'` - Since difficulty is a scalar, and not categorical, "anova" method is best fit for it.  
+*  `method = 'class'` - "anova" would suit better (as seen down bellow), but because difficulty is a scalar, just for accuracy assessment, we used "class".  
 *  `minsplit=2` - A control variable to make sure there will be not only root node with single decision.  
 *  `minbucket=5` - A control variable to make sure that there won't be too many sub nodes in the tree, won't have a node (or bucket) with less than 5% confidence.  
 
@@ -259,10 +324,32 @@ As for visualization, this line is all we need:
 rpart.plot(tree);
 ```
 
+Now we will see the accuracy of that tree:  
+```{r}
+predict_unseen = predict(tree, test, type = 'class');
+table_mat = table(test$difficulty, predict_unseen);
+table_mat
+
+accuracy_test = sum(diag(table_mat)) / sum(table_mat);
+```
+We got that the accuracy of the decision tree test is `r accuracy_test`.  
+
+Now a "anova" test, as difficulty is a scalar and can be set any real number between 1 and 5:  
+```{r}
+tree = rpart(
+  difficulty ~ duration + Average.total.exp + Average.relevant.exp,
+  data = train,
+  method = 'anova',
+  minsplit = 2,
+  minbucket = 5
+);
+rpart.plot(tree);
+```
+
 ## Multiple linear regression
-Since the user picks which type of exercise it is before publishing the exercise, we can split the split the data to different types and develop an algorithm for each type.  
-After the first user completes the exercise, the difficulty will be decided by the time it took him (duration), his total experience and relevant experience.  
-As for the algorithms themselves, we chose to use multiple linear regression test as it's very simple to implement later in the app.  
+Since the user picks which type of exercise it is before publishing the exercise, we can split the data to different types and develop an algorithm for each type.  
+After the first user completes the exercise, the difficulty will be decided by the time it took him (duration), his total experience and his relevant experience.  
+As for the algorithms themselves, we chose to use multiple linear regression test as it's very simple to implement later in the app (as seen in the conclusion part).  
 
 * ### Model - Time type
   ```{r}
@@ -352,7 +439,7 @@ In our Time model for example, with duration, total experience and relevant expe
   mlrTimeModel13 <- lm(difficulty ~ duration + Average.relevant.exp, data = data[data$exercise.type == "Time", ])
 ```
 > The model is better than the than any other variant of the predictors (multiple and single linear models) 
-> since it has R2 of `r summary(mlrTimeModel)$r.squared` and the others are - `r summary(mlrTimeModel21)$r.squared`, `r summary(mlrTimeModel22)$r.squared`, `r summary(mlrTimeModel23)$r.squared`, `r summary(mlrTimeModel11)$r.squared`, `r summary(mlrTimeModel12)$r.squared`, `r summary(mlrTimeModel13)$r.squared`.   
+> since it has R2 of `r summary(mlrTimeModel)$r.squared`, which is the highest, and the others are - `r summary(mlrTimeModel21)$r.squared`, `r summary(mlrTimeModel22)$r.squared`, `r summary(mlrTimeModel23)$r.squared`, `r summary(mlrTimeModel11)$r.squared`, `r summary(mlrTimeModel12)$r.squared`, `r summary(mlrTimeModel13)$r.squared`.   
 
 ##### Residual Standard Error (RSE), or sigma  
 The RSE estimate gives a measure of error of prediction. The lower the RSE, the more accurate the model (on the data in hand).  
@@ -364,26 +451,27 @@ sigma(mlrIntervalModel)/mean(data[data$exercise.type == "Interval", ]$difficulty
 sigma(mlrNoInteractionModel)/mean(data[data$exercise.type == "No interaction", ]$difficulty);
 ```
 
-> In our multiple regression Time model, the RSE is `r sigma(mlrTimeModel)` corresponding to `r sigma(mlrTimeModel)/mean(data[data$exercise.type == "Time", ]$difficulty)`% error rate.
->  Again, this is better than the other variants, where the RSE are `r sigma(mlrTimeModel21)` (`r sigma(mlrTimeModel21)/mean(data[data$exercise.type == "Time", ]$difficulty)`% error rate), 
+> In our multiple regression Time model, the RSE is `r sigma(mlrTimeModel)` corresponding to `r sigma(mlrTimeModel)/mean(data[data$exercise.type == "Time", ]$difficulty)`% error rate.  
+> Again, this is better than the other variants, where the RSE are `r sigma(mlrTimeModel21)` (`r sigma(mlrTimeModel21)/mean(data[data$exercise.type == "Time", ]$difficulty)`% error rate), 
 `r sigma(mlrTimeModel22)` (`r sigma(mlrTimeModel22)/mean(data[data$exercise.type == "Time", ]$difficulty)`% error rate), 
 `r sigma(mlrTimeModel23)` (`r sigma(mlrTimeModel23)/mean(data[data$exercise.type == "Time", ]$difficulty)`% error rate), 
 `r sigma(mlrTimeModel11)` (`r sigma(mlrTimeModel11)/mean(data[data$exercise.type == "Time", ]$difficulty)`% error rate), 
 `r sigma(mlrTimeModel12)` (`r sigma(mlrTimeModel12)/mean(data[data$exercise.type == "Time", ]$difficulty)`% error rate), 
 `r sigma(mlrTimeModel13)` (`r sigma(mlrTimeModel13)/mean(data[data$exercise.type == "Time", ]$difficulty)`% error rate).
 
-# Implementation
-Now once we have those equations for each exercise type, usage is pretty easy.  
+# Conclusion
+## Implementation
+Now once we got those equations for each exercise type, usage is pretty easy.  
 The server is written in NodeJS and is deployed to AWS cloud server.  
 The important bit is where the user sends an event of exercise completion and gains exp for the exercise.  
 Previously, this was the code which calculated the experience:  
 <img src="asset/2020-08-20-05-59-26.png" style="height: 80px;">  
-The code takes the difficulty set for the exercise, multiples it with a predefined factor which converts the scale of the difficulty (1-5) to experience (0-10k for now) 
-and splits it evenly (that's why there is division) between each muscle the exercise is set to workout on.  
+The code takes the difficulty set for the exercise, multiples it with a predefined factor (`difficultyToExpFactor`) which converts the scale of the difficulty (1-5) to experience (0-10k for now) 
+and splits it evenly (that's why there is division) between each muscle (attribute in the code) the exercise is set to workout on.  
 As we can see, difficulty is not always set, and currently only once we reach a set amount of feedbacks on the exercise, the difficulty is automatically set.  
 We want to fix that, so we added that code to the server, and the predictors to the database:  
 <img src="asset/2020-08-20-05-55-09.png" style="width: 700px;">   
 Now there is never a time where a user isn't rewarded for a workout, and when there is enough feedback from the users about the said exercise, it will use their feedback instead.  
-We should mention that the predictors aren't hardcoded to the server, and rerunning this R code and updating the values inside the configuration table (used by ConfigurationRepository) is enough to update the model's equation.  
-And Voila! Now even new exercises rewards the users with experience!  
+We should mention that the predictors aren't hardcoded to the server, and rerunning this R code and updating the values inside the configuration table in PostgreSQL (used by `ConfigurationRepository`) is enough to update the model's equation.  
+And Voila! Now even new exercises rewards the users with experience and motivates them to workout harder!  
 <img src="asset/2020-08-20-06-08-19.png" style="width: 300px;">   
