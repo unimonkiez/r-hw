@@ -367,7 +367,7 @@ As for the algorithms themselves, we chose to use multiple linear regression tes
   ```
   difficulty = (`r parameters[1]`) + duration * (`r parameters[2]`) + totalExp * (`r parameters[3]`) + relevantExp * (`r parameters[4]`);
   
-* Repetitions 
+* ### Model - Repetitions type 
   ```{r}
   mlrRepetitionsModel <- lm(difficulty ~ duration + Average.total.exp + Average.relevant.exp, data = data[data$exercise.type == "Repetitions", ])
   summary(mlrRepetitionsModel);
@@ -382,7 +382,7 @@ As for the algorithms themselves, we chose to use multiple linear regression tes
   ```
   difficulty = (`r parameters[1]`) + duration * (`r parameters[2]`) + totalExp * (`r parameters[3]`) + relevantExp * (`r parameters[4]`);
 
-* Interval
+* ### Model - Interval type 
   ```{r}
   mlrIntervalModel <- lm(difficulty ~ duration + Average.total.exp + Average.relevant.exp, data = data[data$exercise.type == "Interval", ])
   summary(mlrIntervalModel);
@@ -397,7 +397,7 @@ As for the algorithms themselves, we chose to use multiple linear regression tes
   ```
   difficulty = (`r parameters[1]`) + duration * (`r parameters[2]`) + totalExp * (`r parameters[3]`) + relevantExp * (`r parameters[4]`);
 
-* No interaction
+* ### Model - No interaction type 
   ```{r}
   mlrNoInteractionModel <- lm(difficulty ~ duration + Average.total.exp + Average.relevant.exp, data = data[data$exercise.type == "No interaction", ])
   summary(mlrNoInteractionModel);
@@ -429,15 +429,15 @@ An R2 value close to 1 indicates that the model explains a large portion of the 
 A problem with the R2, is that, it will always increase when more variables are added to the model, even if those variables are only weakly associated with the response.  
 A solution is to adjust the R2 by taking into account the number of predictor variables.  
 The adjustment in the “Adjusted R Square” value in the summary output is a correction for the number of variables included in the prediction model.  
-In our Time model for example, with duration, total experience and relevant experience predictor variables, the adjusted R2 = `r summary(mlrTimeModel)$r.squared`, meaning that “`r summary(mlrTimeModel)$r.squared * 100`% of the variance in the measure of sales can be predicted by duration, total experience and relevant experience values.  
+In our Time model for example, with duration, total experience and relevant experience predictor variables, the adjusted R2 = `r summary(mlrTimeModel)$r.squared`, meaning that “`r summary(mlrTimeModel)$r.squared * 100`% of the variance in the measure of difficulty can be predicted by duration, total experience and relevant experience values.  
 
 ```{r}
   mlrTimeModel21 <- lm(difficulty ~ Average.total.exp + Average.relevant.exp, data = data[data$exercise.type == "Time", ])
   mlrTimeModel22 <- lm(difficulty ~ duration + Average.relevant.exp, data = data[data$exercise.type == "Time", ])
   mlrTimeModel23 <- lm(difficulty ~ duration + Average.total.exp, data = data[data$exercise.type == "Time", ])
-  mlrTimeModel11 <- lm(difficulty ~ duration + duration, data = data[data$exercise.type == "Time", ])
-  mlrTimeModel12 <- lm(difficulty ~ duration + Average.total.exp, data = data[data$exercise.type == "Time", ])
-  mlrTimeModel13 <- lm(difficulty ~ duration + Average.relevant.exp, data = data[data$exercise.type == "Time", ])
+  mlrTimeModel11 <- lm(difficulty ~ duration, data = data[data$exercise.type == "Time", ])
+  mlrTimeModel12 <- lm(difficulty ~ Average.total.exp, data = data[data$exercise.type == "Time", ])
+  mlrTimeModel13 <- lm(difficulty ~ Average.relevant.exp, data = data[data$exercise.type == "Time", ])
 ```
 > The model is better than any other variant of the predictors (multiple and single linear models) 
 > since it has R2 of `r summary(mlrTimeModel)$r.squared`, which is the highest, and the others are - `r summary(mlrTimeModel21)$r.squared`, `r summary(mlrTimeModel22)$r.squared`, `r summary(mlrTimeModel23)$r.squared`, `r summary(mlrTimeModel11)$r.squared`, `r summary(mlrTimeModel12)$r.squared`, `r summary(mlrTimeModel13)$r.squared`.   
